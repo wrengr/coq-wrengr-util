@@ -1,7 +1,7 @@
 # wren gayle romano <wren@cpan.org>                 ~ 2015.02.04
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-SYNCURL         = wren@community.haskell.org:~/public_html/coq/relations
+SYNCURL         = wren@community.haskell.org:~/public_html/coq/wrengr-util
 
 RM              = rm -f
 RMR             = rm -rf
@@ -108,6 +108,7 @@ include $(SRCDIR)/.depend
 	
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~ Generate html documentation
+# BUG: The generated html use unqualified names. How do we get the qualified names?
 docs:
 	mkdir -p $(HTMLDIR)
 	@make html
