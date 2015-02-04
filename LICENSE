@@ -1,0 +1,11 @@
+Copyright (c) 2015, wren gayle romano.
+ALL RIGHTS RESERVED.
+
+All the non-tactics code in this library is released under the 3-clause BSD license, as defined in the LICENSE-BSD3 file.
+
+For the tactics code things are more complicated. Many of the implementations were inspired by [1] which is licensed under the LGPL version 3, as defined in the LICENSE-LGPLv3 file. And the tactics in Util.Tactics.Crush were inspired by [2] which is licenced under CC-by-nc-nd 3.0 as defined at [3]. It is unclear to what extend these two inspirations impose requirements on the licensing for this library.
+
+
+[1] <http://www.chargueraud.org/softs/tlc>
+[2] <http://adam.chlipala.net/cpdt/repo/file/ded318830bb0/src/CpdtTactics.v>
+[3] <http://creativecommons.org/licenses/by-nc-nd/3.0/>

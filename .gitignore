@@ -1,0 +1,12 @@
+.DS_Store
+.depend
+*.vo
+*.glob
+*.v.d
+*.vi
+*.g
+*.html
+*.g.html
+*.cmi
+*.cmx
+*.o
