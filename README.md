@@ -3,14 +3,24 @@
 -->
 
 This library provides a collection of utility tactics and lemmas.
-There's nothing special going on here, but these are utilities I
-use often in my other Coq code.
+There's nothing particularly special going on here, but they're
+pretty helpful and often used in my code.
 
 ## INSTALLATION
 
-Installation details are explained in the file `INSTALL.txt`.
+Installation should be pretty straightforward. All you have to do
+is the standard incantation:
+
+    make
+    sudo make install
+
+If time is of the essence, you can do `make compile` instead of
+`make`. Doing so will only compile the code, instead of also
+generating the documentation.
 
 ## USAGE
+
+Honestly, I'm not sure how to link against the library after it's installed. Installation will put things in "`coqtop -where`/user-contrib/WrengrUtils", but who knows what happens after that?
 
 It is possible to use the HoTT library directly on the command line
 with the `hoqtop` script, but who does that?

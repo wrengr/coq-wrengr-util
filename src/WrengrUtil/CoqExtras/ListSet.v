@@ -1,7 +1,16 @@
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (** * Extensions to [Coq.Lists.ListSet]
 
-cf <http://coq.inria.fr/stdlib/Coq.Lists.ListSet.html>
+This module provides a handful of lemmas for ListSets which aren't
+included in the standard library. More particularly, we provide the
+[listset] and [listset_star] hint databases for teaching [auto] how
+to reason about ListSets. The [listset] database covers all the
+syntax-directed lemmas, and so is very lightweight to use. The
+[listset_star] database adds a few extra tactics for handling certain
+forms of non-syntax-directed reasoning, however this makes it much
+slower to use. *)
+
+(* cf <http://coq.inria.fr/stdlib/Coq.Lists.ListSet.html>
 
 Also see the discussion at:
 <http://comments.gmane.org/gmane.science.mathematics.logic.coq.club/1663> *)
@@ -108,6 +117,7 @@ Qed.
 
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(** Discrimination based on set membership. *)
 Lemma needs_a_good_name : forall
     {A   : Type}
     (eq_dec : forall x y : A, {x = y} + {x <> y})
@@ -120,11 +130,13 @@ Proof.
   induction xs as [ | x0 xs0 IHxs0 ];
     [ identity (*absurd*)
     | simpl; destruct (eq_dec x x0); destruct (eq_dec y x0); congruence
-    ]. (* BUG: why doesn't [destruct_if] work here? *)
+    ].
+    (* BUG: why doesn't [destruct_if] work here? *)
 Qed.
 
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(** Elimination rule for [set_add]. *)
 Lemma set_add_elim : forall
     {A   : Type}
     (eq_dec : forall x y : A, {x = y} + {x <> y})
@@ -171,6 +183,7 @@ Qed.
 
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(** *)
 Lemma set_not_union_elim1 : forall
     {A : Type}
     (eq_dec : forall x y : A, {x = y} + {x <> y})
@@ -185,6 +198,8 @@ Proof.
     ].
 Qed.
 
+
+(** *)
 Lemma set_not_union_elim2 : forall
     {A : Type}
     (eq_dec : forall x y : A, {x = y} + {x <> y})
@@ -200,6 +215,7 @@ Proof.
 Qed.
 
 
+(** *)
 Lemma set_not_diff_elim1 : forall
     {A : Type}
     (eq_dec : forall x y : A, {x = y} + {x <> y})
@@ -352,6 +368,7 @@ Proof.
 Qed.
 
 
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (** ** Tactics *)
 (* BUG: these are being listed as for "any goal" instead of their specific ones! (excepting ones for and, eq, & or) *)

@@ -1,7 +1,7 @@
-# wren gayle romano <wren@cpan.org>                 ~ 2015.02.04
+# wren gayle romano <wren@cpan.org>                 ~ 2015.02.05
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-LIBRARY_NAME    = WrengrUtils
+LIBRARY_NAME    = WrengrUtil
 SYNCURL         = wren@community.haskell.org:~/public_html/coq/wrengr-util
 
 RM              = rm -f
@@ -33,18 +33,18 @@ COQC_SRC        = -R $(SRCDIR) ""
 COQC_LIBS       =
 
 MODULES       = \
-    Tactics/Core \
-    Tactics/ExFalso \
-    Tactics/Destroy \
-    Tactics/Fequal \
-    Tactics/Introv \
-    Tactics/Jauto \
-    CoqExtras/Bool \
-    CoqExtras/ListSet \
-    CoqExtras/Multiset \
-    CoqExtras/Nat \
-    CoqExtras/Option \
-    CoqExtras/Sumbool
+    $(LIBRARY_NAME)/Tactics/Core \
+    $(LIBRARY_NAME)/Tactics/ExFalso \
+    $(LIBRARY_NAME)/Tactics/Destroy \
+    $(LIBRARY_NAME)/Tactics/Fequal \
+    $(LIBRARY_NAME)/Tactics/Introv \
+    $(LIBRARY_NAME)/Tactics/Jauto \
+    $(LIBRARY_NAME)/CoqExtras/Bool \
+    $(LIBRARY_NAME)/CoqExtras/ListSet \
+    $(LIBRARY_NAME)/CoqExtras/Multiset \
+    $(LIBRARY_NAME)/CoqExtras/Nat \
+    $(LIBRARY_NAME)/CoqExtras/Option \
+    $(LIBRARY_NAME)/CoqExtras/Sumbool
 
 # TODO: should we add Util.Nat.Irrelevance back in?
 

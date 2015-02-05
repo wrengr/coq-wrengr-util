@@ -10,6 +10,7 @@ Require Import Coq.Arith.Le.
 Require Import Coq.Arith.Lt.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(** The multiset difference operator. *)
 Definition mdiff {A:Type} (m1 m2 : multiset A) : multiset A :=
     Bag (fun a:A => multiplicity m1 a - multiplicity m2 a).
 
@@ -17,6 +18,8 @@ Delimit Scope multiset_scope with multiset.
 Bind Scope multiset_scope with multiset.
 Open Scope multiset_scope.
 
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(** ** Notations for common multiset relationships. *)
 
 (** Subset for multisets. N.B., _not_ submultiset! *)
 Notation "xs \c ys" :=
@@ -40,6 +43,7 @@ Notation "xs [=] ys" :=
 
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(** ** Transitivity for common multiset relationships. *)
 
 Lemma msubset_trans
     : forall {A : Type} {xs ys zs : multiset A}
