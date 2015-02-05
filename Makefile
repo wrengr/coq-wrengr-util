@@ -1,20 +1,28 @@
 # wren gayle romano <wren@cpan.org>                 ~ 2015.02.04
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+LIBRARY_NAME    = WrengrUtils
 SYNCURL         = wren@community.haskell.org:~/public_html/coq/wrengr-util
 
 RM              = rm -f
 RMR             = rm -rf
 RM_SUFFIXES     = {vo,glob,vi,g,cmi,cmx,o}
 
-COQ_PATH        = /sw/bin/
-COQDOC          = $(COQ_PATH)/coqdoc
+BINDIR          = /sw/bin/
+LIBDIR          = $(shell $(BINDIR)coqtop -where | sed -e 's/\\/\\\\/g')
+SRCDIR          = ./src
+# TODO: actually use $(BUILDDIR)
+BUILDDIR        = ./build
+HTMLDIR         = ./docs
+
+COQDOC          = $(BINDIR)coqdoc
 COQDOC_LIBS     =
 COQDOC_CSS      = custom.css
-HTMLDIR         = ./docs
-GALLINA         = $(COQ_PATH)/gallina
-COQDEP          = $(COQ_PATH)/coqdep -c
-COQC            = $(COQ_PATH)/coqc
+
+GALLINA         = $(BINDIR)gallina
+COQDEP          = $(BINDIR)coqdep -c
+
+COQC            = $(BINDIR)coqc
 COQC_OPT        = -opt
 # BUG: we'd like to add -quality but it's not an OTHERFLAG. Where does it go?
 COQC_OTHERFLAGS =
@@ -24,10 +32,7 @@ COQC_DEBUG      =
 COQC_SRC        = -R $(SRCDIR) ""
 COQC_LIBS       =
 
-SRCDIR          = ./src
-# TODO: actually use $(BUILDDIR)
-BUILDDIR        = ./build
-COQ_FILES       = \
+MODULES       = \
     Util/Tactics/Core \
     Util/Tactics/ExFalso \
     Util/Tactics/Destroy \
@@ -45,13 +50,13 @@ COQ_FILES       = \
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-COQ_VFILES     = $(foreach i, $(COQ_FILES), $(SRCDIR)/$(i).v)
-COQ_VOFILES    = $(foreach i, $(COQ_FILES), $(SRCDIR)/$(i).vo)
-COQ_GLOBFILES  = $(foreach i, $(COQ_FILES), $(SRCDIR)/$(i).glob)
-COQ_VIFILES    = $(foreach i, $(COQ_FILES), $(SRCDIR)/$(i).vi)
-COQ_GFILES     = $(foreach i, $(COQ_FILES), $(SRCDIR)/$(i).g)
-COQ_HTMLFILES  = $(foreach i, $(COQ_FILES), $(HTMLDIR)/$(i).html)
-COQ_GHTMLFILES = $(foreach i, $(COQ_FILES), $(HTMLDIR)/$(i).g.html)
+MODULES_V     = $(foreach i, $(MODULES), $(SRCDIR)/$(i).v)
+MODULES_VO    = $(foreach i, $(MODULES), $(SRCDIR)/$(i).vo)
+MODULES_GLOB  = $(foreach i, $(MODULES), $(SRCDIR)/$(i).glob)
+MODULES_VI    = $(foreach i, $(MODULES), $(SRCDIR)/$(i).vi)
+MODULES_G     = $(foreach i, $(MODULES), $(SRCDIR)/$(i).g)
+MODULES_HTML  = $(foreach i, $(MODULES), $(HTMLDIR)/$(i).html)
+MODULES_GHTML = $(foreach i, $(MODULES), $(HTMLDIR)/$(i).g.html)
 
 COQC_INCLUDES  = $(foreach i, $(COQC_LIBS), -I $(i)) $(COQC_SRC)
 # N.B. The order of flags is really, stupidly, buggily important
@@ -67,26 +72,26 @@ all:
 	@make docs
 
 # ~~~~~ 
-spec: $(COQ_VIFILES)
+spec: $(MODULES_VI)
 
 %.vi: %.v
 	$(COQC) -i $(COQC_DEBUG) $(COQ_FLAGS) $*
 
 # ~~~~~ 
-gallina: $(COQ_GFILES)
+gallina: $(MODULES_G)
 
 %.g: %.v
 	$(GALLINA) $<
 
 
 # ~~~~~ Compile the sources
-compile: $(SRCDIR)/.depend $(COQ_VOFILES)
+compile: $(SRCDIR)/.depend $(MODULES_VO)
 
-extract: $(COQ_VOFILES)
+extract: $(MODULES_VO)
 	@echo "Not supported yet"
 
-$(SRCDIR)/.depend : $(COQ_VFILES)
-	$(COQDEP) -glob $(COQC_INCLUDES) $(COQ_VFILES) > $(SRCDIR)/.depend 2>/dev/null
+$(SRCDIR)/.depend : $(MODULES_V)
+	$(COQDEP) -glob $(COQC_INCLUDES) $(MODULES_V) > $(SRCDIR)/.depend 2>/dev/null
 
 include $(SRCDIR)/.depend
 
@@ -102,11 +107,11 @@ docs:
 	@make html
 	@#make gallinahtml
 
-html: $(COQ_HTMLFILES)
+html: $(MODULES_HTML)
 	@mkdir -p $(HTMLDIR)
 	@# N.B. we need this hack to keep $(SRCDIR) out of the names
 	cd $(SRCDIR) ;\
-		$(COQDOC) -toc --html --utf8 $(COQDOC_LIBS) -d ../$(HTMLDIR) $(foreach i, $(COQ_FILES), $(i).v)
+		$(COQDOC) -toc --html --utf8 $(COQDOC_LIBS) -d ../$(HTMLDIR) $(foreach i, $(MODULES), $(i).v)
 	if [ -e $(COQDOC_CSS) ] ; then \
 		cp -f $(COQDOC_CSS) $(HTMLDIR)/coqdoc.css ; else :; fi
 
@@ -119,11 +124,11 @@ $(HTMLDIR)/%.html: $(SRCDIR)/%.v $(SRCDIR)/%.glob
 # ~~~~~ This one doesn't show the proof scripts
 # BUG: this doesn't produce hyperlinks correctly...
 # BUG: seems like we can't do both "html" and "gallinahtml" targets at once
-gallinahtml: $(COQ_GHTMLFILES)
+gallinahtml: $(MODULES_GHTML)
 	@mkdir -p $(HTMLDIR)
 	@# BUG: why isn't this hack keeping $(SRCDIR) out of the names this time?
 	cd $(SRCDIR) ;\
-		$(COQDOC) -toc --html --utf8 -g $(COQDOC_LIBS) -d ../$(HTMLDIR) $(foreach i, $(COQ_FILES), $(i).v)
+		$(COQDOC) -toc --html --utf8 -g $(COQDOC_LIBS) -d ../$(HTMLDIR) $(foreach i, $(MODULES), $(i).v)
 	if [ -e $(COQDOC_CSS) ] ; then \
 		cp -f $(COQDOC_CSS) $(HTMLDIR)/coqdoc.css ; else :; fi
 
@@ -136,17 +141,22 @@ $(HTMLDIR)/%.g.html: $(SRCDIR)/%.v $(SRCDIR)/%.glob
 # TODO: a version with -l in lieu of -g, to hide more gunk.
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~ From <https://github.com/wouter-swierstra/xmonad/blob/master/Makefile>
-COQLIB:=$(shell $(COQBIN)coqtop -where | sed -e 's/\\/\\\\/g')
-COQ_VOFILES0:=$(filter-out ,$(COQ_VOFILES))
+# ~~~~~ cf <https://github.com/wouter-swierstra/xmonad/blob/master/Makefile>
 
+# BUG: The $$i includes ./src/
+# TODO: okay sure, but after doing this, how do we load it?
 install:
-	mkdir -p $(COQLIB)/user-contrib
-	(for i in $(COQ_VOFILES0); do \
-	 install -d `dirname $(COQLIB)/user-contrib/$(INSTALLDEFAULTROOT)/$$i`; \
-	 install $$i $(COQLIB)/user-contrib/$(INSTALLDEFAULTROOT)/$$i; \
-	 done)
-	 
+	mkdir -p $(LIBDIR)/user-contrib
+	for i in $(MODULES_VO); do \
+		install -d `dirname $(LIBDIR)/user-contrib/$(LIBRARY_NAME)/$$i` ;\
+		install $$i $(LIBDIR)/user-contrib/$(LIBRARY_NAME)/$$i ;\
+		done
+
+
+#Makefile.coq: Makefile $(MODULES_V)
+#	@coq_makefile -R . $(LIBRARY_NAME) $(MODULES_V) -o Makefile.coq
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~ From Jia et al.'s metatheory Makefile
 #DATE = $(shell date +%Y%m%d)
