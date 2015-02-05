@@ -33,18 +33,18 @@ COQC_SRC        = -R $(SRCDIR) ""
 COQC_LIBS       =
 
 MODULES       = \
-    Util/Tactics/Core \
-    Util/Tactics/ExFalso \
-    Util/Tactics/Destroy \
-    Util/Tactics/Fequal \
-    Util/Tactics/Introv \
-    Util/Tactics/Jauto \
-    Util/Bool \
-    Util/ListSet \
-    Util/Multiset \
-    Util/Nat \
-    Util/Option \
-    Util/Sumbool
+    Tactics/Core \
+    Tactics/ExFalso \
+    Tactics/Destroy \
+    Tactics/Fequal \
+    Tactics/Introv \
+    Tactics/Jauto \
+    Core/Bool \
+    Core/ListSet \
+    Core/Multiset \
+    Core/Nat \
+    Core/Option \
+    Core/Sumbool
 
 # TODO: should we add Util.Nat.Irrelevance back in?
 
@@ -143,13 +143,15 @@ $(HTMLDIR)/%.g.html: $(SRCDIR)/%.v $(SRCDIR)/%.glob
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~ cf <https://github.com/wouter-swierstra/xmonad/blob/master/Makefile>
 
-# BUG: The $$i includes ./src/
 # TODO: okay sure, but after doing this, how do we load it?
+# HACK: we use a bunch of potentially fragile things to strip $(SRCDIR) and any following "/"s from the front of $i. We should figure out how to make this more robust...
 install:
 	mkdir -p $(LIBDIR)/user-contrib
 	for i in $(MODULES_VO); do \
-		install -d `dirname $(LIBDIR)/user-contrib/$(LIBRARY_NAME)/$$i` ;\
-		install $$i $(LIBDIR)/user-contrib/$(LIBRARY_NAME)/$$i ;\
+		j=$${i#"$(SRCDIR)"} ;\
+		j="`echo "$$j" | sed 's@^/*@@'`" ;\
+		install -d `dirname $(LIBDIR)/user-contrib/$(LIBRARY_NAME)/$$j` ;\
+		install $$i $(LIBDIR)/user-contrib/$(LIBRARY_NAME)/$$j ;\
 		done
 
 
