@@ -7,20 +7,11 @@ RM              = rm -f
 RMR             = rm -rf
 RM_SUFFIXES     = {vo,glob,vi,g,cmi,cmx,o}
 
-LATEXMK         = latexmk
-LATEXMK_FLAGS   = -pdf -g
-PAPERDIR        = ./latex
-PAPER           = Containers
-
-# N.B., versions 8.2 and 8.3 are very different.
 COQ_PATH        = /sw/bin/
-# COQ_PATH        = /opt/local/bin/
-
 COQDOC          = $(COQ_PATH)/coqdoc
 COQDOC_LIBS     =
 COQDOC_CSS      = custom.css
 HTMLDIR         = ./docs
-
 GALLINA         = $(COQ_PATH)/gallina
 COQDEP          = $(COQ_PATH)/coqdep -c
 COQC            = $(COQ_PATH)/coqc
@@ -29,10 +20,13 @@ COQC_OPT        = -opt
 COQC_OTHERFLAGS =
 COQC_XML        =
 COQC_DEBUG      =
+# BUG: the -R flag doesn't seem to be recursing for me ~w
+COQC_SRC        = -R $(SRCDIR) ""
+COQC_LIBS       =
+
 SRCDIR          = ./src
 # TODO: actually use $(BUILDDIR)
 BUILDDIR        = ./build
-# TODO: the test stuff needs to be separated out, since it requires Coq 8.2
 COQ_FILES       = \
     Util/Tactics/Core \
     Util/Tactics/ExFalso \
@@ -48,11 +42,7 @@ COQ_FILES       = \
     Util/Sumbool
 
 # TODO: should we add Util.Nat.Irrelevance back in?
-# TODO: Util.Containers requires Relations.Core
 
-# BUG: the -R flag doesn't seem to be recursing for me ~w
-COQC_SRC        = -R $(SRCDIR) ""
-COQC_LIBS       =
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 COQ_VFILES     = $(foreach i, $(COQ_FILES), $(SRCDIR)/$(i).v)
@@ -62,7 +52,6 @@ COQ_VIFILES    = $(foreach i, $(COQ_FILES), $(SRCDIR)/$(i).vi)
 COQ_GFILES     = $(foreach i, $(COQ_FILES), $(SRCDIR)/$(i).g)
 COQ_HTMLFILES  = $(foreach i, $(COQ_FILES), $(HTMLDIR)/$(i).html)
 COQ_GHTMLFILES = $(foreach i, $(COQ_FILES), $(HTMLDIR)/$(i).g.html)
-COQ_TEXFILES   = $(foreach i, $(COQ_FILES), $(PAPERDIR)/coqdoc_$(i).tex)
 
 COQC_INCLUDES  = $(foreach i, $(COQC_LIBS), -I $(i)) $(COQC_SRC)
 # N.B. The order of flags is really, stupidly, buggily important
@@ -70,13 +59,12 @@ COQC_FLAGS     = -q $(COQC_OPT) $(COQC_INCLUDES) $(COQC_OTHERFLAGS) $(COQC_XML)
 
 .SUFFIXES:
 .SUFFIXES: .tex .vo .glob .vi .g .html .g.html .pdf
-.PHONY: all spec gallina compile extract docs html gallinahtml paper sync clean
+.PHONY: all spec gallina compile extract docs html gallinahtml sync clean
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 all:
 	@make compile
 	@make docs
-	@#make paper
 
 # ~~~~~ 
 spec: $(COQ_VIFILES)
@@ -147,32 +135,19 @@ $(HTMLDIR)/%.g.html: $(SRCDIR)/%.v $(SRCDIR)/%.glob
 
 # TODO: a version with -l in lieu of -g, to hide more gunk.
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~ Typeset the paper
-paper: $(COQ_TEXFILES) $(PAPERDIR)/$(PAPER).pdf
+# ~~~~~ From <https://github.com/wouter-swierstra/xmonad/blob/master/Makefile>
+COQLIB:=$(shell $(COQBIN)coqtop -where | sed -e 's/\\/\\\\/g')
+COQ_VOFILES0:=$(filter-out ,$(COQ_VOFILES))
 
-%.pdf: %.tex
-	cd "`dirname "$*.tex"`" ;\
-		$(LATEXMK) $(LATEXMK_FLAGS) "`basename "$*.tex"`"
-
-$(PAPERDIR)/coqdoc_%.tex: $(SRCDIR)/%.v
-	$(COQDOC) --short --body-only --latex --utf8 \
-		"$(SRCDIR)/$*.v" -o "$(PAPERDIR)/coqdoc_$*.tex"
-
-#all.ps: $(VFILES)
-#	$(COQDOC) -toc -ps $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $(VFILES)`
-#
-#all-gal.ps: $(VFILES)
-#	$(COQDOC) -toc -ps -g $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $(VFILES)`
-#
-#all.pdf: $(VFILES)
-#	$(COQDOC) -toc -pdf $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $(VFILES)`
-#
-#all-gal.pdf: $(VFILES)
-#	$(COQDOC) -toc -pdf -g $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $(VFILES)`
-
-
+install:
+	mkdir -p $(COQLIB)/user-contrib
+	(for i in $(COQ_VOFILES0); do \
+	 install -d `dirname $(COQLIB)/user-contrib/$(INSTALLDEFAULTROOT)/$$i`; \
+	 install $$i $(COQLIB)/user-contrib/$(INSTALLDEFAULTROOT)/$$i; \
+	 done)
+	 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~ From Jia et al.'s metatheory Makefile
 #DATE = $(shell date +%Y%m%d)
 #DIR  = metalib-$(DATE)
@@ -209,12 +184,6 @@ DATE = $(shell date +%Y%m%d)
 
 # ~~~~~ Remove all generated files
 clean:
-	if [ -d $(PAPERDIR) ] ; then \
-		cd $(PAPERDIR) && \
-		$(LATEXMK) -C $(PAPER).tex && \
-		$(RM) coqdoc_*.tex coqdoc.sty *.bbl ; else :; fi
-	@echo ; echo ; echo
-	
 	@( \
 	echo "#!`which sh`" ;\
 	echo 'echo '\''$(RM)'\'' "$$1"/'\''*.$(RM_SUFFIXES)'\' ;\
