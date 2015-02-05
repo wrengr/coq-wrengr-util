@@ -8,7 +8,7 @@ tactic and its uses, see the tutorial:
     <http://www.cis.upenn.edu/~bcpierce/sf/UseTactics.html>   *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-Require Import Util.Tactics.ExFalso.
+Require Import Tactics.ExFalso.
 
 
 (** [destruct_if] looks for a pattern of the form [if ?B then _ else _]

@@ -39,12 +39,12 @@ MODULES       = \
     Tactics/Fequal \
     Tactics/Introv \
     Tactics/Jauto \
-    Core/Bool \
-    Core/ListSet \
-    Core/Multiset \
-    Core/Nat \
-    Core/Option \
-    Core/Sumbool
+    CoqExtras/Bool \
+    CoqExtras/ListSet \
+    CoqExtras/Multiset \
+    CoqExtras/Nat \
+    CoqExtras/Option \
+    CoqExtras/Sumbool
 
 # TODO: should we add Util.Nat.Irrelevance back in?
 

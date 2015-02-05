@@ -8,10 +8,10 @@ Also see the discussion at:
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 Require Import Coq.Lists.ListSet.
-Require Export Util.Tactics.Core.
-Require Import Util.Tactics.Destroy.
-Require Import Util.Tactics.Introv.
-Require Import Util.Tactics.Jauto.
+Require Export Tactics.Core.
+Require Import Tactics.Destroy.
+Require Import Tactics.Introv.
+Require Import Tactics.Jauto.
 
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)

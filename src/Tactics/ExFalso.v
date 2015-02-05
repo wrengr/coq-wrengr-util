@@ -8,7 +8,7 @@ tactic and its uses, see the tutorial:
     <http://www.cis.upenn.edu/~bcpierce/sf/UseTactics.html>   *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-Require Export Util.Tactics.Core.
+Require Export Tactics.Core.
 
 
 (* TODO: improve this if possible. *)
