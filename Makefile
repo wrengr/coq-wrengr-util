@@ -11,7 +11,7 @@ RM_SUFFIXES     = {vo,glob,vi,g,cmi,cmx,o}
 BINDIR          = $(shell dirname $(shell which coqc))
 LIBDIR          = $(shell $(BINDIR)/coqtop -where | sed -e 's/\\/\\\\/g')
 SRCDIR          = ./src
-# TODO: actually use $(BUILDDIR)
+# TODO: actually use $(BUILDDIR) as intended...
 BUILDDIR        = ./build
 HTMLDIR         = ./docs
 
@@ -32,11 +32,11 @@ COQC_DEBUG      =
 # N.B., we pass $(LIBRARY_NAME) instead of "" so that the
 # compiled/installed libraries are registered under the LIBRARY_NAME
 # module namespace; e.g., as WrengrUtil.Tactics.Core instead of as
-# Tactics.Core
+# just Tactics.Core
 COQC_SRC        = -R $(SRCDIR) $(LIBRARY_NAME)
 COQC_LIBS       =
 
-MODULES       = \
+MODULES = \
     Tactics/Core \
     Tactics/ExFalso \
     Tactics/Destroy \
@@ -48,11 +48,16 @@ MODULES       = \
     CoqExtras/Multiset \
     CoqExtras/Nat \
     CoqExtras/Option \
-    CoqExtras/Sumbool
+    CoqExtras/Sumbool \
+    Relations/Core \
+    Relations/Temporal \
+    Relations/Properties
 
+# TODO: should we add Util.Container back in?
 # TODO: should we add Util.Nat.Irrelevance back in?
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 MODULES_V     = $(foreach i, $(MODULES), $(SRCDIR)/$(i).v)
 MODULES_VO    = $(foreach i, $(MODULES), $(SRCDIR)/$(i).vo)
@@ -61,7 +66,6 @@ MODULES_VI    = $(foreach i, $(MODULES), $(SRCDIR)/$(i).vi)
 MODULES_G     = $(foreach i, $(MODULES), $(SRCDIR)/$(i).g)
 MODULES_HTML  = $(foreach i, $(MODULES), $(HTMLDIR)/$(i).html)
 MODULES_GHTML = $(foreach i, $(MODULES), $(HTMLDIR)/$(i).g.html)
-
 
 COQC_INCLUDES  = $(foreach i, $(COQC_LIBS), -I $(i)) $(COQC_SRC)
 # N.B. The order of flags is really, stupidly, buggily important
@@ -106,24 +110,39 @@ include $(SRCDIR)/.depend
 	
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~ Generate html documentation
-# BUG: The generated html use unqualified names. How do we get the qualified names?
+# BUG: The generated html use unqualified names. How do we get the
+# qualified names?
+
 docs:
 	mkdir -p $(HTMLDIR)
 	@make html
 	@#make gallinahtml
 
+
+# I think this one is the one that generates the files with unqualified
+# file names... Maybe it's due to $(MODULES_HTML) being defined
+# incorrectly?
 html: $(MODULES_HTML)
 	@mkdir -p $(HTMLDIR)
 	@# N.B. we need this hack to keep $(SRCDIR) out of the names
-	cd $(SRCDIR) ;\
+	cd $(SRCDIR) && \
 		$(COQDOC) -toc --html --utf8 $(COQDOC_LIBS) -d ../$(HTMLDIR) $(foreach i, $(MODULES), $(i).v)
 	if [ -e $(COQDOC_CSS) ] ; then \
 		cp -f $(COQDOC_CSS) $(HTMLDIR)/coqdoc.css ; else :; fi
 
+
+# BUG: This gives the correct file names, but still shows the
+# unqualified names at the top of the page; i.e., in the <h1
+# class="libtitle"> tag.
+#
+# BUG: trying to set the title with the -t or --title flag doesn't
+# work; it results in an empty <title> tag.
+#
+# TODO: should we try using the "-R dir modulespace" flag?
 $(HTMLDIR)/%.html: $(SRCDIR)/%.v $(SRCDIR)/%.glob
 	@mkdir -p $(HTMLDIR)
 	@touch $(HTMLDIR)/coqdoc.css
-	$(COQDOC) -glob-from $(SRCDIR)/$*.glob --quiet --noindex --html --utf8 -d $(HTMLDIR) $(SRCDIR)/$*.v -o $(HTMLDIR)/$(subst /,.,$*).html
+	$(COQDOC) -glob-from $(SRCDIR)/$*.glob --quiet --noindex --html --utf8 -d $(HTMLDIR) $(SRCDIR)/$*.v -o $(HTMLDIR)/$(LIBRARY_NAME)-$(subst /,-,$*).html
 
 
 # ~~~~~ This one doesn't show the proof scripts
@@ -159,6 +178,8 @@ install:
 		install $$i $(LIBDIR)/user-contrib/$(LIBRARY_NAME)/$$j ;\
 		done
 
+
+# BUG: this doesn't remove the directories left over from installing...
 uninstall:
 	@for i in $(MODULES_VO); do \
 		j=$${i#"$(SRCDIR)"} ;\
