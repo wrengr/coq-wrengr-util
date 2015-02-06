@@ -1,4 +1,4 @@
-# wren gayle romano <wren@cpan.org>                 ~ 2015.02.05
+# wren gayle romano <wren@cpan.org>                 ~ 2015.02.06
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 LIBRARY_NAME    = WrengrUtil
@@ -8,28 +8,32 @@ RM              = rm -f
 RMR             = rm -rf
 RM_SUFFIXES     = {vo,glob,vi,g,cmi,cmx,o}
 
-BINDIR          = /sw/bin/
-LIBDIR          = $(shell $(BINDIR)coqtop -where | sed -e 's/\\/\\\\/g')
+BINDIR          = $(shell dirname $(shell which coqc))
+LIBDIR          = $(shell $(BINDIR)/coqtop -where | sed -e 's/\\/\\\\/g')
 SRCDIR          = ./src
 # TODO: actually use $(BUILDDIR)
 BUILDDIR        = ./build
 HTMLDIR         = ./docs
 
-COQDOC          = $(BINDIR)coqdoc
+COQDOC          = $(BINDIR)/coqdoc
 COQDOC_LIBS     =
 COQDOC_CSS      = custom.css
 
-GALLINA         = $(BINDIR)gallina
-COQDEP          = $(BINDIR)coqdep -c
+GALLINA         = $(BINDIR)/gallina
+COQDEP          = $(BINDIR)/coqdep -c
 
-COQC            = $(BINDIR)coqc
+COQC            = $(BINDIR)/coqc
 COQC_OPT        = -opt
-# BUG: we'd like to add -quality but it's not an OTHERFLAG. Where does it go?
+# TODO: we'd like to add -quality but it's not an OTHERFLAG. Where
+# is it supposed to go exactly?
 COQC_OTHERFLAGS =
 COQC_XML        =
 COQC_DEBUG      =
-# BUG: the -R flag doesn't seem to be recursing for me ~w
-COQC_SRC        = -R $(SRCDIR) ""
+# N.B., we pass $(LIBRARY_NAME) instead of "" so that the
+# compiled/installed libraries are registered under the LIBRARY_NAME
+# module namespace; e.g., as WrengrUtil.Tactics.Core instead of as
+# Tactics.Core
+COQC_SRC        = -R $(SRCDIR) $(LIBRARY_NAME)
 COQC_LIBS       =
 
 MODULES       = \
@@ -57,6 +61,7 @@ MODULES_VI    = $(foreach i, $(MODULES), $(SRCDIR)/$(i).vi)
 MODULES_G     = $(foreach i, $(MODULES), $(SRCDIR)/$(i).g)
 MODULES_HTML  = $(foreach i, $(MODULES), $(HTMLDIR)/$(i).html)
 MODULES_GHTML = $(foreach i, $(MODULES), $(HTMLDIR)/$(i).g.html)
+
 
 COQC_INCLUDES  = $(foreach i, $(COQC_LIBS), -I $(i)) $(COQC_SRC)
 # N.B. The order of flags is really, stupidly, buggily important
@@ -152,6 +157,13 @@ install:
 		j="`echo "$$j" | sed 's@^/*@@'`" ;\
 		install -d `dirname $(LIBDIR)/user-contrib/$(LIBRARY_NAME)/$$j` ;\
 		install $$i $(LIBDIR)/user-contrib/$(LIBRARY_NAME)/$$j ;\
+		done
+
+uninstall:
+	@for i in $(MODULES_VO); do \
+		j=$${i#"$(SRCDIR)"} ;\
+		j="`echo "$$j" | sed 's@^/*@@'`" ;\
+		$(RM) $(LIBDIR)/user-contrib/$(LIBRARY_NAME)/$$j ;\
 		done
 
 
