@@ -1,5 +1,10 @@
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(** * Temporal-logic modalities for relations. *)
+(** * Temporal-logic modalities for relations.
+
+This is experimental code to try to make the [eventually] quantifier
+of [Relations.Temporal] behave more nicely. If/once the code actually
+works as desired, it will be folded into the [Relations.Temporal]
+module. *)
 Require Import Relations.Core.
 Require Import Util.Nat.
 Require Import Coq.Arith.Le.
