@@ -1,7 +1,7 @@
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(** * Extensions to [Coq.Sets.Multiset]
+(** * Extensions to [Coq.Sets.Multiset] *)
 
-cf <http://coq.inria.fr/stdlib/Coq.Sets.Multiset.html> *)
+(* cf <http://coq.inria.fr/stdlib/Coq.Sets.Multiset.html> *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 Require Import Coq.Sets.Multiset.

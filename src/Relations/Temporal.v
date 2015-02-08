@@ -2,7 +2,7 @@
 (** * Temporal-logic modalities for relations. *)
 Require Import Relations.Core.
 Require Import Coq.Arith.Le.
-Require Import WrengrUtil.CoqExtras.Nat.
+Require Import CoqExtras.Nat.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (** The universal-affirmative syllogism with existential import. *)

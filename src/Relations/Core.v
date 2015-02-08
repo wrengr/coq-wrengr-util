@@ -27,7 +27,7 @@ argument ordering.*)
 
 (* cf., <http://coq.inria.fr/V8.3pl3/refman/Reference-Manual031.html> *)
 Require Import Coq.Setoids.Setoid.
-Require Import WrengrUtil.Tactics.Core.
+Require Import Tactics.Core.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* N.B., [Constant Coq.Relations.Relation_Definitions] gives a

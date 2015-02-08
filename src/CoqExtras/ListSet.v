@@ -18,6 +18,7 @@ Also see the discussion at:
 
 Require Import Coq.Lists.ListSet.
 Require Export Tactics.Core.
+Require Export Tactics.ExFalso.
 Require Import Tactics.Destroy.
 Require Import Tactics.Introv.
 Require Import Tactics.Jauto.
@@ -37,10 +38,10 @@ Lemma set_remove_intro : forall
     , set_In x (set_remove eq_dec y xs).
 Proof.
   induction xs as [ | x0 xs0 IHxs0 ].
-    identity. (*absurd*)
+    ex_falso. (* identity *)
     
     simpl; destruct_if; intro H; destruct H;
-        [ congruence (*absurd*)
+        [ ex_falso (* congruence *)
         | 
         | left
         | right; apply IHxs0
@@ -59,7 +60,7 @@ Lemma set_remove_complete1 : forall
     , ~ set_In x (set_remove eq_dec x xs).
 Proof.
   induction xs as [ | x0 xs0 IHxs0 ]; simpl.
-    identity. (*absurd*)
+    ex_falso. (* identity *)
     
     destruct_if; simpl.
       (* BUG: goal [~ set_In x (set_remove eq_dec x xs0) |- ~ set_In x xs0]
@@ -103,7 +104,7 @@ Lemma set_remove_elim : forall
     , set_In x xs.
 Proof.
   induction xs as [ | x0 xs0 IHxs0 ];
-    [ identity (*absurd*)
+    [ ex_falso (* identity *)
     | simpl; destruct_if; intro H;
       [ right
       | destruct H; [left | right; apply IHxs0]
@@ -128,7 +129,7 @@ Lemma needs_a_good_name : forall
     , x <> y.
 Proof.
   induction xs as [ | x0 xs0 IHxs0 ];
-    [ identity (*absurd*)
+    [ ex_falso (* identity *)
     | simpl; destruct (eq_dec x x0); destruct (eq_dec y x0); congruence
     ].
     (* BUG: why doesn't [destruct_if] work here? *)

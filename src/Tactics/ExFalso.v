@@ -29,7 +29,8 @@ Ltac elimtype_False :=
     unaltered. *)
 Tactic Notation "ex_falso" constr(E) "by" tactic(T) :=
     solve
-        [ contradiction
+        [ identity
+        | contradiction
         | congruence (* Hoisted out to avoid redundant [False_ind False]. *)
         | intros
         ; elimtype_False
