@@ -29,13 +29,13 @@ The `Tactics.Fequal` module defines the `fequal` tactic, which is
 an improved version of the built-in `f_equal` tactic.
 
 The `Tactics.Introv` module defines the `introv` tactic described
-in the [UseTactics][] chapter of Software Foundations and implemented
-in [TLC][]. This is an introduction tactic that lest you get away
+in the [UseTactics][] chapter of _Software Foundations_ and implemented
+in [TLC][]. This is an introduction tactic that lets you get away
 with only naming the non-dependent hypotheses. Any preceeding
 dependent hypotheses are introduced with their default names.
 
 The `Tactics.Jauto` module defines some improvements on `auto` based
-on the [UseAuto][] chapter of Software Foundations and implemented
+on the [UseAuto][] chapter of _Software Foundations_ and implemented
 in [TLC][]. These tactics are still pretty experimental in my
 opinion, and I don't use them very much, but they can be nice to
 see or to have on hand. The `iauto` tactic just is a shorthand for
