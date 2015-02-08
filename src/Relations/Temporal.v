@@ -15,6 +15,11 @@ Hint Transparent forall1.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(** ** Eventually
+
+The property [P] must hold after some finite number of steps, on
+every path starting from [a]. This is the "AF" modality in CTL. *)
+
 Fixpoint eventually_
     {A:Type} (R : relation A) (P : A -> Prop) (n:nat) (a:A) {struct n} :=
         match n with
@@ -22,13 +27,13 @@ Fixpoint eventually_
         | S n' => P a \/ forall1 (R a) (eventually_ R P n')
         end.
 
-(** The property [P] must hold eventually, on every path starting
-    from [a]. This is the "AF" modality in CTL. *)
+
 Definition eventually
     {A:Type} (R : relation A) (P : A -> Prop) (a:A) :=
         exists n, eventually_ R P n a.
 
 
+(** *)
 Lemma eventually_is_monotonic_
     : forall {A:Type} (R : relation A) (P : A -> Prop) (m n : nat) (a:A),
     m <= n -> eventually_ R P m a -> eventually_ R P n a.
@@ -127,6 +132,12 @@ Proof.
     
     
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(** ** Until
+
+The property [P] must hold along all paths from [a], until eventually
+[Q] holds. This is the strong until operator: it requires that [Q]
+does in fact hold eventually. This is the "AU" modality in CTL. *)
+
 Fixpoint until_
     {A:Type} (R : relation A) (P Q : A -> Prop) (n:nat) (a:A) {struct n} :=
         match n with
@@ -134,14 +145,13 @@ Fixpoint until_
         | S n' => Q a \/ (P a /\ forall1 (R a) (until_ R P Q n'))
         end.
 
-(** The property [P] holds along all paths from [a], until eventually
-    [Q] holds. This is the strong until operator: it requires that
-    [Q] holds eventually. This is the "AU" modality in CTL. *)
+
 Definition until
     {A:Type} (R : relation A) (P Q : A -> Prop) (a:A) :=
         exists n, until_ R P Q n a.
 
 
+(** *)
 Theorem until_is_monotonic_
     : forall {A:Type} (R : relation A) (P Q : A -> Prop) (m n : nat) (a:A),
     m <= n -> until_ R P Q m a -> until_ R P Q n a.
@@ -172,6 +182,7 @@ Lemma until_is_idempotent
 
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(** *)
 Lemma until_is_strong_
     : forall {A:Type} (R : relation A) (P Q : A -> Prop) (n:nat) (a:A),
     until_ R P Q n a -> eventually_ R Q n a.
@@ -186,6 +197,7 @@ Proof.
         | intros; apply IHn; apply H; assumption ]]].
 Qed.
 
+
 Corollary until_is_strong
     : forall {A:Type} (R : relation A) (P Q : A -> Prop) (a:A),
     until R P Q a -> eventually R Q a.
@@ -195,6 +207,7 @@ Proof.
 Qed.
 
 
+(** *)
 (* TODO: actually use the [forever] type... *)
 Lemma forever_and_eventually_implies_until_
     :  forall (n:nat) {A:Type} (R : relation A) (P Q : A -> Prop) (a:A)
@@ -228,6 +241,7 @@ Proof.
 Qed.
 
 
+(** *)
 Theorem eventually_iff_true_until
     : forall {A:Type} (R : relation A) (P : A -> Prop) (a:A),
     eventually R P a <-> until R (fun _ => True) P a.
@@ -241,9 +255,15 @@ Qed.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(** Traditionally called "globally". This is the "AG" modality in
-    CTL. We define this as a CoInductive type in order to be able
-    to prove [forever_is_complete]. *)
+(** ** Forever
+
+The property [P] must hold along all paths from [a] regardless of
+how many steps are taken. This is the "AG" modality in CTL, which
+is traditionally called "globally".
+
+We define [forever] as a CoInductive type in order to be able to
+prove [forever_is_complete]. *)
+
 CoInductive forever {A:Type} (R : relation A) (P : A -> Prop) (a:A) : Prop :=
     | forever_intro :
         P a -> (forall a', R a a' -> forever R P a') -> forever R P a
@@ -251,6 +271,7 @@ CoInductive forever {A:Type} (R : relation A) (P : A -> Prop) (a:A) : Prop :=
     (* TODO: Why not actually use [forall b, R^* a b -> P b]? *)
 
 
+(** *)
 Theorem forever_is_sound
     :  forall {A:Type} (R : relation A) (P : A -> Prop) (a:A)
     ,  forever R P a
@@ -268,6 +289,7 @@ Proof.
 Qed.
 
 
+(** *)
 (* TODO: rephrase this as a Theorem instead of a CoFixpoint? *)
 CoFixpoint forever_is_complete
     {A:Type} (R : relation A) (P : A -> Prop) (a:A)
@@ -291,6 +313,7 @@ Defintion release
 *)
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(** *)
 (* BUG: this says "AG P => ~AF~P". But we want "AG P <=> ~EF~P". *)
 Lemma forever_implies_not_eventually_not
     : forall {A:Type} (R : relation A) (P : A -> Prop) (a:A),
