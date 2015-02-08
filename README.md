@@ -21,8 +21,8 @@ generating the documentation.
 ## USAGE
 
 Honestly, I'm not sure how to link against the library after it's
-installed. Installation will put things in "`coqtop
--where`/user-contrib/WrengrUtil", but who knows what happens after
+installed. Installation will put things in "\`coqtop
+-where\`/user-contrib/WrengrUtil", but who knows what happens after
 that?
 
 ## CONTRIBUTING
