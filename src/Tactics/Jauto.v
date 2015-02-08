@@ -83,9 +83,9 @@ Ltac jauto_set :=
 
 
 (** [jauto] is better at [intuition eauto] because it can open
-    existentials from the context. In the same time, [jauto] can
+    existentials from the context. At the same time, [jauto] can
     be faster than [intuition eauto] because it does not destruct
-    disjunctions from the  context. The strategy of [jauto] can be
+    disjunctions from the context. The strategy of [jauto] can be
     summarized as follows:
 
     - open all existentials and conjunctions from the context.

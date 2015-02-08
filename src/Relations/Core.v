@@ -150,6 +150,11 @@ Qed.
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (** ** The transitive closure of a relation. *)
 
+(** This is the obvious definition of transitive closure; however,
+    it gives a terrible inductive principle. The [TC_optR] closure
+    gives a much better inductive principle, and perhaps the [R ^+]
+    notation would be better reserved for that implementation. *)
+
 (* BUG: we can't seem to do the [Inductive...with] to codefine the notation. *)
 Inductive TC {A:Type} (R : relation A) : relation A :=
     | TC_step  : forall a b,   R a b -> TC R a b
@@ -368,6 +373,13 @@ Proof. eauto using @wf_R_impl_neq, @TC_wf. Qed.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (** ** The reflexive transitive closure of a relation. *)
+
+
+(** This is the obvious definition of reflexive transitive closure;
+    however, it gives a terrible inductive principle. The [RTC_opt]
+    closure gives a much better inductive principle, and perhaps
+    the [R ^*] notation would be better reserved for that implementation.
+    *)
 
 Inductive RTC {A:Type} (R : relation A) : relation A :=
     | RTC_step  : forall a b,   R a b -> RTC R a b
@@ -625,6 +637,12 @@ Fixpoint RTC_unoptimize
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (** ** The symmetric reflexive transitive closure of a relation. *)
+
+(** This is the obvious definition of symmetric reflexive transitive
+    closure; however, it gives a terrible inductive principle. The
+    [RSTC_opt] closure gives a much better inductive principle, and
+    perhaps the [R ^=] notation would be better reserved for that
+    implementation. *)
 
 Inductive RSTC {A:Type} (R : relation A) : relation A :=
     | RSTC_step  : forall a b,   R a b -> RSTC R a b
