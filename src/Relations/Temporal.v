@@ -195,6 +195,7 @@ Proof.
 Qed.
 
 
+(* TODO: actually use the [forever] type... *)
 Lemma forever_and_eventually_implies_until_
     :  forall (n:nat) {A:Type} (R : relation A) (P Q : A -> Prop) (a:A)
     ,  (forall b, R^* a b -> P b) (* [forever R P a] *)
@@ -214,6 +215,8 @@ Proof.
             | apply H; exact aRc ]]]]].
 Qed.
 
+
+(* TODO: actually use the [forever] type... *)
 Corollary forever_and_eventually_implies_until
     :  forall {A:Type} (R : relation A) (P Q : A -> Prop) (a:A)
     ,  (forall b, R^* a b -> P b) (* [forever R P a] *)
@@ -238,8 +241,10 @@ Qed.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(** Traditionally called "globally". This is the "AG" modality in CTL. *)
-Inductive forever {A:Type} (R : relation A) (P : A -> Prop) (a:A) : Prop :=
+(** Traditionally called "globally". This is the "AG" modality in
+    CTL. We define this as a CoInductive type in order to be able
+    to prove [forever_is_complete]. *)
+CoInductive forever {A:Type} (R : relation A) (P : A -> Prop) (a:A) : Prop :=
     | forever_intro :
         P a -> (forall a', R a a' -> forever R P a') -> forever R P a
     .
@@ -262,30 +267,17 @@ Proof.
     exact H0.
 Qed.
 
-(* TODO:
-Theorem forever_is_complete
-    :  forall {A:Type} (R : relation A) (P : A -> Prop) (a:A)
-    ,  (forall b, R^* a b -> P b)
-    -> forever R P a.
-Proof.
-  intros.
-  constructor. (* BUG: we need some kind of coinduction *)
-    apply H; reflexivity.
-    
-    intros.
-Abort.
 
-(* Alas, this doesn't work since [forever] isn't a CoInductive... *)
+(* TODO: rephrase this as a Theorem instead of a CoFixpoint? *)
 CoFixpoint forever_is_complete
     {A:Type} (R : relation A) (P : A -> Prop) (a:A)
     (H: forall b, R^* a b -> P b)
     : forever R P a
     :=
     forever_intro R P a (H a (RTC_refl a))
-        (fun b (aRb : R a b) => forever_is_complete R P b
-            (fun c bRc => H c (RTC_trans (RTC_step aRb) bRc))) .
-*)
-    
+        (fun b aRb => forever_is_complete R P b
+            (fun c bRc => H c (RTC_trans (RTC_step aRb) bRc))).
+  
 
 (*
 Definition weakuntil
