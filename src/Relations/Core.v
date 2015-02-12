@@ -652,6 +652,46 @@ Definition RTC_opt_case
 (* TODO: Definition RTC_opt_join *)
 
 
+(** *** Use [RTC_opt_case] directly on something of type [RTC].
+
+    N.B., you can't use this via [case Rab using @RTC_optimize_case]
+    because it has the "wrong" number of arguments for the [case]
+    tactic. Instead, it should be used via [apply (RTC_optimize_case
+    Rab P)]. *)
+Definition RTC_optimize_case
+    {A : Type}
+    {R : relation A}
+    {a b : A}
+    (H : R^* a b)
+    (P : relation A)
+    (prefl : forall a0,                               a=a0 -> b=a0 -> P a0 a0)
+    (pcons : forall a0 b0 c0, R a0 b0 -> R^* b0 c0 -> a=a0 -> b=c0 -> P a0 c0)
+    : P a b
+    :=
+    @RTC_opt_case A R a b (RTC_optimize H) P
+        (fun x             Ea Eb => prefl x Ea Eb)
+        (fun x y z rxy ryz Ea Eb =>
+            pcons x y z rxy (RTC_unoptimize ryz) Ea Eb).
+
+
+(** *** Use [RTC_opt_ind] directly on something of type [RTC].
+
+    N.B., to make use of this use the tactic [induction Rab using
+    @RTC_optimize_ind]. The [@] is necessary since we make [A] and
+    [R] implicit arguments. *)
+Definition RTC_optimize_ind
+    {A : Type} {R : relation A} (P : relation A)
+    (refl : forall a, P a a)
+    (cons : forall a b c, R a b -> R^* b c -> P b c -> P a c)
+    {a b} (rab : R^* a b)
+    : P a b
+    :=
+    @RTC_opt_ind A R P
+        refl
+        (fun x y z rxy ryz pyz => cons x y z rxy (RTC_unoptimize ryz) pyz)
+        a b (RTC_optimize rab).
+
+
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (** ** The symmetric reflexive transitive closure of a relation. *)
 
