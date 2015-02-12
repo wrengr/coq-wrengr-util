@@ -1,4 +1,4 @@
-# wren gayle romano <wren@cpan.org>                 ~ 2015.02.06
+# wren gayle romano <wren@cpan.org>                 ~ 2015.02.12
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 LIBRARY_NAME    = WrengrUtil
@@ -51,6 +51,8 @@ MODULES = \
     CoqExtras/Sumbool \
     Relations/Core \
     Relations/Temporal \
+    Relations/Normalization \
+    Relations/ChurchRosser \
     Relations/Properties
 
 # TODO: should we add Util.Container back in?
