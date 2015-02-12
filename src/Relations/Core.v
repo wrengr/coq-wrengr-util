@@ -630,7 +630,24 @@ Fixpoint RTC_unoptimize
 
 
 (* TODO: Definition lift_TC_to_RTC_opt *)
-(* TODO: Definition RTC_opt_case *)
+
+Definition RTC_opt_case
+    {A : Type}
+    {R : relation A}
+    {a b : A}
+    (H : RTC_opt R a b)
+    (P : relation A)
+    (prefl : forall a0,
+        a=a0 -> b=a0 -> P a0 a0)
+    (pcons : forall a0 b0 c0, R a0 b0 -> RTC_opt R b0 c0 ->
+        a=a0 -> b=c0 -> P a0 c0)
+    : P a b
+    :=
+    match H in (RTC_opt _ a' b') return (a=a' -> b=b' -> P a' b') with
+    | RTC_opt_refl a0             => prefl a0
+    | RTC_opt_cons a0 b0 c0 l0 r0 => pcons a0 b0 c0 l0 r0
+    end (eq_refl a) (eq_refl b).
+
 (* TODO: Definition RTC_opt_fmap *)
 (* TODO: Definition RTC_opt_join *)
 
