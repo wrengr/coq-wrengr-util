@@ -1,5 +1,14 @@
+# Ignore OSX cruft
 .DS_Store
+
+# Ignore emacs/ProofGeneral cruft
+\#*
+
+# Ignore Makefile-generated Coq files
 .depend
+docs/
+
+# Ignore general generated Coq files
 *.vo
 *.glob
 *.v.d
