@@ -28,6 +28,7 @@ argument ordering.*)
 (* cf., <http://coq.inria.fr/V8.3pl3/refman/Reference-Manual031.html> *)
 Require Import Coq.Setoids.Setoid.
 Require Import Tactics.Core.
+Require Import CoqExtras.Wf.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* N.B., [Constant Coq.Relations.Relation_Definitions] gives a
@@ -134,16 +135,36 @@ Definition RC_unconverse
         end.
 
 (** If every point is accessible by [RC R], then every point was
-    accessible by [R] to begin with. Thus, we can use the reflexive
-    reduction of any well-founded relation in lieu of that relation
-    itself. Which is good, since [Acc_irrefl] indicates that
-    accessible points can't be reflexive. *)
-Lemma RC_inv_wf
-    : forall {A : Type} {R : relation A}
-    , well_founded (R^?) -> well_founded R.
+    accessible by [R] to begin with. However, note that by
+    [not_inhabited_if_RC_wf] this also means [R] can only be the
+    empty relation over the empty domain. *)
+Lemma RC_inv_wf :
+    forall {A : Type} {R : relation A},
+    well_founded (R^?) -> well_founded R.
 Proof.
   intros A R H a; induction (H a) as [x _ H0];
   constructor; intros y H1; apply H0; constructor; assumption.
+Qed.
+
+
+(** Well-founded relations are irreflexive. Thus, if the [A] is
+    inhabited, then [RC R] cannot be well-founded. *)
+Lemma RC_not_wf_if_inhabited :
+    forall {A : Type}, A ->
+    forall {R : relation A}, ~ well_founded (R^?).
+Proof. intros A a R H. exact (@wf_R_irrefl A (R^?) H a (RC_refl a)). Qed.
+
+
+(** Well-founded relations are irreflexive. Thus, if [RC R] is
+    well-founded, then [A] cannot be inhabited. *)
+Corollary not_inhabited_if_RC_wf :
+    forall {A : Type} {R : relation A},
+    well_founded (R^?) -> (A -> Empty_set).
+Proof.
+  (* Have to re-prove [wf_R_irrefl] since [Empty_set] lives in [Set]. *)
+  intros A R H a.
+  induction (H a) as [a _ H0].
+  exact (H0 a (RC_refl a)).
 Qed.
 
 
@@ -321,14 +342,42 @@ Fixpoint TC_optimizeR
             (@TC_optimizeR A R b0 c0 r0)
     end.
 
-(* TODO: Definition TC_unoptimizeR *)
+
+Fixpoint TC_unoptimizeR
+    {A} {R : relation A} {a b} (r : TC_optR R a b) {struct r} : R^+ a b
+    :=
+    match r in (TC_optR _ a' b') return (R^+ a' b') with
+    | TC_optR_step a0 b0    l0    => @TC_step A R a0 b0 l0
+    | TC_optR_snoc a0 b0 c0 l0 r0 =>
+        @TC_trans A R a0 b0 c0
+            (@TC_unoptimizeR A R a0 b0 l0)
+            (@TC_step A R b0 c0 r0)
+    end.
+        
 (* TODO: Definition TC_optR_case *)
 (* TODO: Definition TC_optR_fmap *)
 (* TODO: Definition TC_optR_join *)
 
 
+(** *** Use [TC_optR_ind] directly on something of type [TC].
+
+    N.B., to make use of this use the tactic [induction Rab using
+    @TC_optimizeR_ind]. The [@] is necessary since we make [A] and
+    [R] implicit arguments. *)
+Definition TC_optimizeR_ind
+    {A : Type} {R : relation A} (P : relation A)
+    (step : forall a b,   R a b -> P a b)
+    (snoc : forall a b c, R^+ a b -> P a b -> R b c -> P a c)
+    {a b} (rab : R^+ a b)
+    : P a b
+    :=
+    @TC_optR_ind A R P
+        step
+        (fun x y z rxy pxy ryz => snoc x y z (TC_unoptimizeR rxy) pxy ryz)
+        a b (TC_optimizeR rab).
+
 (* <http://permalink.gmane.org/gmane.science.mathematics.logic.coq.club/8609> *)
-Lemma TC_optR_wf
+Theorem TC_optR_wf
     : forall {A : Type} {R : relation A}
     , well_founded R -> well_founded (TC_optR R).
 Proof.
@@ -337,21 +386,15 @@ Proof.
     [ eauto | apply (H0 b H2); trivial ].
 Qed.
 
-(* TODO: move to [Util.Wf]? *)
-(* Wait, what? Every well-founded relation is irreflexive? *)
-Lemma Acc_irrefl : forall {A:Type} (R : relation A) (x : A), Acc R x -> ~R x x.
-Proof. intros; induction H; intro; exact (H0 x H1 H1). Qed.
+Corollary wf_R_TC_optR_irrefl :
+    forall {A : Type} (R : relation A), well_founded R ->
+    forall {a : A}, ~TC_optR R a a.
+Proof. eauto using @wf_R_irrefl, @TC_optR_wf. Qed.
 
-(* TODO: move to [Util.Wf]? *)
-Corollary wf_R_impl_neq
-    : forall {A : Type} (R : relation A) (a b : A)
-    , well_founded R -> R a b -> a <> b.
-Proof. intros; red; destruct 1; exact (@Acc_irrefl _ _ _ (H a) H0). Qed.
-
-Corollary wf_R_TC_optR_impl_neq
-    : forall {A : Type} (R : relation A) (a b : A)
-    , well_founded R -> TC_optR R a b -> a <> b.
-Proof. eauto using @wf_R_impl_neq, @TC_optR_wf. Qed.
+Corollary wf_R_TC_optR_implies_neq :
+    forall {A : Type} (R : relation A), well_founded R ->
+    forall {a b}, TC_optR R a b -> a <> b.
+Proof. eauto using @wf_R_implies_neq, @TC_optR_wf. Qed.
 
 
 Corollary TC_wf
@@ -365,10 +408,15 @@ Proof.
     ].
 Qed.
 
-Corollary wf_R_TC_impl_neq
-    : forall {A : Type} (R : relation A), well_founded R ->
-    forall (a b : A), R^+ a b -> a <> b.
-Proof. eauto using @wf_R_impl_neq, @TC_wf. Qed.
+Corollary wf_R_TC_irrefl :
+    forall {A : Type} (R : relation A), well_founded R ->
+    forall {a : A}, ~(R^+ a a).
+Proof. eauto using @wf_R_irrefl, @TC_wf. Qed.
+
+Corollary wf_R_TC_implies_neq :
+    forall {A : Type} (R : relation A), well_founded R ->
+    forall {a b : A}, R^+ a b -> a <> b.
+Proof. eauto using @wf_R_implies_neq, @TC_wf. Qed.
 
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
@@ -458,7 +506,7 @@ Fixpoint RTC_fmap
     {A  : Type}
     {R  : relation A}
     (f  : A -> A)
-    (Rf : forall  a b,  R   a b -> R   (f a) (f b))
+    (Rf : forall a b, R a b -> R (f a) (f b))
     {a b} (r : R^* a b) {struct r}: R^* (f a) (f b) :=
         match r in (_^* a0 b0) return (R^* (f a0) (f b0)) with
         | RTC_step  a0 b0    r0    => RTC_step (Rf a0 b0 r0)
@@ -544,18 +592,6 @@ Defined.
 (* TODO: RC (TC R) <-> RTC R *)
 (* TODO: TC (RC R) <-> RTC R *)
 (* TODO: TC (RC R) <-> RC (TC R), for convenience? *)
-(* TODO:
-
-Lemma RTC_wf
-    : forall {A : Type} {R : relation A}
-    , well_founded (R^?) -> well_founded (R^* )
-Proof. TC_wf. TC (RC R) -> RTC R. Qed.
-
-Lemma RTC_inv_wf
-    : forall {A : Type} {R : relation A}
-    , well_founded (R^* ) -> well_founded (R^+)
-Proof. RTC R -> RC (TC R). RC_inv_wf. Qed.
-*)
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (** A flattened version of [RTC], which can sometimes be easier
@@ -693,7 +729,7 @@ Definition RTC_optimize_ind
 
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(** ** The symmetric reflexive transitive closure of a relation. *)
+(** ** The reflexive symmetric transitive closure of a relation. *)
 
 (** This is the obvious definition of symmetric reflexive transitive
     closure; however, it gives a terrible inductive principle. The
@@ -773,7 +809,7 @@ Fixpoint RSTC_fmap
     {A  : Type}
     {R  : relation A}
     (f  : A -> A)
-    (Rf : forall  a b,  R   a b -> R   (f a) (f b))
+    (Rf : forall a b, R a b -> R (f a) (f b))
     {a b} (r : R^= a b) {struct r}: R^= (f a) (f b) :=
         match r in (_^= a0 b0) return (R^= (f a0) (f b0)) with
         | RSTC_step  a0 b0    r0    => RSTC_step (Rf a0 b0 r0)
@@ -1005,6 +1041,25 @@ Fixpoint RSTC_unoptimize
             (@RSTC_unoptimize A R b0 c0 r0)
     end.
 
+
+(** *** Use [RSTC_opt_ind] directly on something of type [RSTC].
+
+    N.B., to make use of this use the tactic [induction Rab using
+    @RSTC_optimize_ind]. The [@] is necessary since we make [A] and
+    [R] implicit arguments. *)
+Definition RSTC_optimize_ind
+    {A : Type} {R : relation A} (P : relation A)
+    (refl  : forall a, P a a)
+    (cons  : forall a b c, R a b -> R^= b c -> P b c -> P a c)
+    (rcons : forall a b c, R b a -> R^= b c -> P b c -> P a c)
+    {a b} (rab : R^= a b)
+    : P a b
+    :=
+    @RSTC_opt_ind A R P
+        refl
+        (fun x y z rxy ryz pyz => cons  x y z rxy (RSTC_unoptimize ryz) pyz)
+        (fun x y z ryx ryz pyz => rcons x y z ryx (RSTC_unoptimize ryz) pyz)
+        a b (RSTC_optimize rab).
 
 (* TODO: Definition lift_RC_to_RSTC_opt *)
 (* TODO: Definition lift_TC_to_RSTC_opt *)

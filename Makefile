@@ -1,4 +1,4 @@
-# wren gayle romano <wren@cpan.org>                 ~ 2015.02.12
+# wren gayle romano <wren@cpan.org>                 ~ 2015.04.14
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 LIBRARY_NAME    = WrengrUtil
@@ -49,6 +49,7 @@ MODULES = \
     CoqExtras/Nat \
     CoqExtras/Option \
     CoqExtras/Sumbool \
+    CoqExtras/Wf \
     Relations/Core \
     Relations/Temporal \
     Relations/Normalization \
