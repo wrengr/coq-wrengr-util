@@ -413,6 +413,7 @@ Corollary wf_R_TC_irrefl :
     forall {a : A}, ~(R^+ a a).
 Proof. eauto using @wf_R_irrefl, @TC_wf. Qed.
 
+(* BUG: something about having moved [a] and [b] means we have to [eauto using] this instead of just using it... *)
 Corollary wf_R_TC_implies_neq :
     forall {A : Type} (R : relation A), well_founded R ->
     forall {a b : A}, R^+ a b -> a <> b.
